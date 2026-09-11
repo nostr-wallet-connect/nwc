@@ -17,4 +17,5 @@ The core NWC protocol is tracked in NIP-47 for now. This repository reserves `01
 | [08](08.md) | Client-Initiated Connection Creation | Defines 1-click connection flows where the client generates its own secret and authorizes via an HTTP confirmation page or a Nostr authorization URI. |
 | [09](09.md)   | Payment Lookup | Defines the generic `lookup_payment` method and common payment record envelope. |
 | [12](12.md)   | BOLT12 Offers | Defines `make_offer` and BOLT12 payment details for `lookup_payment`. |
+| [XX](XX.md) | Connection Budgets | Defines `get_budget` for querying a connection's spending limit, usage, and renewal schedule independently of the wallet balance. |
 | [321](321.md) | BIP-321 Lightning Payments | Defines the `pay` and `receive` methods for BIP-321 Lightning payment instructions. |
