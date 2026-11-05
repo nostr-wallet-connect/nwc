@@ -61,7 +61,8 @@ Request:
         "endpoint": "https://ntfy.sh/upYm9Ft3v1?up=1", // push endpoint, https
         "p256dh": "BCVxsr7N_eNgVRqvHtD0zTZsEc6...", // client's P-256 public key (RFC 8291 ua_public), base64url
         "auth": "BTBZMqHH6r4Tts7J_aSIgg", // 16-byte authentication secret (RFC 8291), base64url
-        "notification_types": ["payment_received"] // optional, defaults to every type the connection receives
+        "notification_types": ["payment_received"], // optional, defaults to every type the connection receives
+        "device_name": "Pixel 9" // optional, shown to the wallet's user
     }
 }
 ```
@@ -80,6 +81,7 @@ Response:
 - `endpoint`: REQUIRED. MUST use `https`. The wallet service SHOULD refuse endpoints on loopback, private or link-local addresses with `BAD_REQUEST`.
 - `p256dh` and `auth`: REQUIRED. Values as produced by `PushSubscription.toJSON().keys` in browsers and by UnifiedPush connector libraries.
 - `notification_types`: OPTIONAL. The wallet service MUST ignore types the connection is not authorized for, and returns the resulting list.
+- `device_name`: OPTIONAL. A short human-readable name for the device, such as its model, so the user can tell the connection's endpoints apart and remove one. The wallet service MAY shorten it (at least 64 characters SHOULD be kept). A re-registration without `device_name` keeps the stored name.
 
 The wallet service MAY limit the number of endpoints per connection and returns `QUOTA_EXCEEDED` when the limit is reached.
 
