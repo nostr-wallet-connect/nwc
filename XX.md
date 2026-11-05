@@ -77,7 +77,7 @@ Response:
 }
 ```
 
-- `endpoint`: REQUIRED. MUST use `https`. The wallet service SHOULD refuse endpoints on loopback, private or link-local addresses with `OTHER`.
+- `endpoint`: REQUIRED. MUST use `https`. The wallet service SHOULD refuse endpoints on loopback, private or link-local addresses with `BAD_REQUEST`.
 - `p256dh` and `auth`: REQUIRED. Values as produced by `PushSubscription.toJSON().keys` in browsers and by UnifiedPush connector libraries.
 - `notification_types`: OPTIONAL. The wallet service MUST ignore types the connection is not authorized for, and returns the resulting list.
 
@@ -133,9 +133,9 @@ The plaintext is the [NWC-02](02.md) notification payload with the id of the not
 }
 ```
 
-A push message carries at most 4096 bytes. When the encrypted payload would be larger, the wallet service MUST reduce `notification` to `type`, `state`, `payment_hash` and `amount`, and add `"truncated": true`. The client then reads the full notification from the relay event with `event_id`, or with `lookup_payment` from [NWC-09](09.md).
+A push message carries at most 4096 bytes. When the encrypted payload would be larger, the wallet service MUST reduce `notification` to `type`, `state`, `payment_hash` and `amount`, and add `"truncated": true`. The client then reads the full payment with `lookup_payment` from [NWC-09](09.md).
 
-Clients SHOULD use `event_id` to ignore a notification that arrives both by push and by relay.
+Notification events are ephemeral (kinds `23196` and `23197`), so relays do not keep them and `event_id` cannot be used to fetch one later. Clients SHOULD use `event_id` to ignore a notification that arrives both by push and by relay.
 
 ### Endpoint lifecycle
 
@@ -151,7 +151,7 @@ The wallet service uses applicable NWC core errors, including:
 - `NOT_IMPLEMENTED` when the methods are unsupported;
 - `RESTRICTED` when the connection is not authorized to receive notifications;
 - `QUOTA_EXCEEDED` when the connection has too many endpoints;
-- `OTHER` when the endpoint or keys are invalid.
+- `BAD_REQUEST` when a parameter, the endpoint or the keys are invalid.
 
 ## Security and privacy considerations
 
