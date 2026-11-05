@@ -26,7 +26,7 @@ A wallet service supporting this specification MUST advertise `logout` in its NW
 
 The wallet service SHOULD include `XX` in the `extensions` tag of its NWC info event (kind `13194`) and in the `extensions` array of the `get_info` response's `result` object.
 
-Every connection MUST be allowed to call `logout`, whatever other permissions it has.
+Every connection is implicitly granted `logout`, whatever other permissions it has. Because `logout` is implicit, it does not count as a granted request method under [NWC-08](08.md) and does not have to be listed in `request_methods` or `optional_request_methods`.
 
 ## Methods
 
@@ -52,9 +52,13 @@ Response:
 }
 ```
 
-After responding successfully, the wallet service MUST NOT honor further requests signed by the connection's key, and SHOULD respond to them with an `UNAUTHORIZED` error.
+The wallet service MUST durably revoke the connection before responding successfully, so that it never confirms a `logout` that did not take effect. Once the connection is revoked, any request signed by its key MUST be rejected, regardless of the request's `created_at`, since a holder of a leaked key can backdate it. Revoking also covers everything else the wallet service sends for the connection: it MUST NOT send [02](02.md) notifications to the connection's public key anymore, and MUST delete any NWC info event (kind `13194`) it published for the connection or stop refreshing it. Whether the connection is deleted or kept in a disabled state is up to the wallet service.
 
-Clients SHOULD send `logout` when the user logs out or disconnects their wallet. Clients SHOULD discard the connection URI whether or not the request succeeds, and SHOULD NOT let a missing or failed response block the user from logging out.
+A payment that was already in flight when the connection was revoked MAY still complete. Revoked requests SHOULD be answered with an `UNAUTHORIZED` error. A wallet service that deletes a per-connection service key on revocation may no longer be able to encrypt that reply, in which case it MAY stay silent.
+
+Isolated connections (see `isolated` in [NWC-08](08.md)) can hold a balance of their own. Revoking such a connection MUST NOT make that balance unreachable: the wallet service MUST keep the funds available to the user after the connection is revoked. A wallet service that cannot do that MAY decline the request with an applicable error such as `OTHER` instead, leaving the connection usable.
+
+Clients SHOULD send `logout` when the user logs out or disconnects their wallet. Clients SHOULD discard the connection URI whether or not the request succeeds, and SHOULD NOT let a missing or failed response block the user from logging out. A client that repeats `logout` on a connection that was already revoked, for example because the success response was lost, SHOULD treat the resulting `UNAUTHORIZED` response as a successful logout.
 
 ## Errors
 
